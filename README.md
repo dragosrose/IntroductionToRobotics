@@ -3,13 +3,13 @@
 Introduction to Robotics laboratory homeworks, taken in the 3rd year at the Faculty of Mathematics and Computer Science, University of Bucharest. Each homework includes requirements, implementation details, code and image files.
 
 <!-- TABLE OF CONTENTS -->
-<details>
+<h3><details>
   <summary>Table of Contents</summary>
   <ol>
     <li><a href="#homework-1">Homework 1</a></li>
     <li><a href="#homework-2">Homework 2</a></li>
   </ol>
-</details>
+</details></h3>
 
 <br>
 
