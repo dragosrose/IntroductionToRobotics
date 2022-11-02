@@ -6,8 +6,8 @@ Introduction to Robotics laboratory homeworks, taken in the 3rd year at the Facu
 <details>
   <summary>Table of Contents</summary>
   <ol>
-    <li><a href="#homework1">Homework 1</a></li>
-    <li><a href="#homework2">Homework 2</a></li>
+    <li><a href="#homework-1">Homework 1</a></li>
+    <li><a href="#homework-2">Homework 2</a></li>
   </ol>
 </details>
 
