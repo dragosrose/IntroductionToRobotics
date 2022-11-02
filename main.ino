@@ -15,10 +15,14 @@ const int buzzer = 13;
 
 byte state = 1;
 
-const int stateTimer1 = 8000;
-const int stateTimer2 = stateTimer1 + 3000;
-const int stateTimer3 = stateTimer2 + 8000;
-const int stateTimer4 = stateTimer3 + 4000;
+const int second = 1000;
+const int halfSecond = 500;
+const int quarterSecond = 250;
+
+const int stateTimer1 = 8 * second;
+const int stateTimer2 = stateTimer1 + 3 * second;
+const int stateTimer3 = stateTimer2 + 8 * second;
+const int stateTimer4 = stateTimer3 + 4 * second;
 
 void setup()
 {
@@ -65,7 +69,7 @@ void loop()
         digitalWrite(redPedLight, LOW);
         digitalWrite(greenPedLight, HIGH);
 
-        if (millis() % 1000 < 500)
+        if (millis() % second < halfSecond)
             tone(buzzer, NOTE_A4, 100);
         else
             noTone(buzzer);
@@ -76,12 +80,12 @@ void loop()
         break;
     case 4:
         digitalWrite(redCarLight, HIGH);
-        if (millis() % 1000 < 500)
+        if (millis() % second < halfSecond)
             digitalWrite(greenPedLight, LOW);
         else
             digitalWrite(greenPedLight, HIGH);
 
-        if (millis() % 500 < 250)
+        if (millis() % halfSecond < quarterSecond)
             tone(buzzer, NOTE_A4, 100);
         else
             noTone(buzzer);
@@ -89,7 +93,7 @@ void loop()
         if (millis() - lastReading > stateTimer4)
         {
             state = 1;
-            lastReading = millis();
+            // lastReading = millis();
         }
 
         break;
