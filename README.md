@@ -2,14 +2,22 @@
 
 Introduction to Robotics laboratory homeworks, taken in the 3rd year at the Faculty of Mathematics and Computer Science, University of Bucharest. Each homework includes requirements, implementation details, code and image files.
 
+<br>
 <!-- TABLE OF CONTENTS -->
 <h3><details>
   <summary>Table of Contents</summary>
   <ol>
+    <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#homework-1">Homework 1</a></li>
     <li><a href="#homework-2">Homework 2</a></li>
   </ol>
 </details></h3>
+
+<br>
+
+## Getting Started
+
+Code regarding the last homework is written in the "main.ino" file. To view the source codes for the other homeworks, please navigate to the "homework" folder.
 
 <br>
 
@@ -51,6 +59,8 @@ resistors and wires
 
 <h3> Picture of the setup: </h3>
 <img src="https://drive.google.com/uc?export=view&id=1q-50skNGcgDhvHY4rlQmZJzDv3XvLUIs" alt="setup picture" />
+
+<br>
 
 <h3> Short video showcasing the setup: </h3>
 <a href="https://drive.google.com/file/d/1prVPlxDzc1HlFhmHoC4C1chddjBHiGcd/view?usp=sharing">Video</a>
