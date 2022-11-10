@@ -21,7 +21,9 @@ const int joyDownThreshold = 300;
 const int joyShortDebounce = 100;
 const int joyLongDebounce = 500;
 
-unsigned long lastJoySWReading = 0;
+unsigned long pressedJoySWTime = 0;
+unsigned long releasedJoySWTime = 0;
+
 int lastJoySWState = LOW;
 int joySWState;
 
@@ -74,6 +76,7 @@ void setup()
 void loop()
 {
     displaySegments();
+    joySWPressed();
     // Read joystick axis xValue
     int yValue = analogRead(joyYPin);
     int xValue = analogRead(joyXPin);
@@ -82,10 +85,6 @@ void loop()
         canvasMovement(xValue, yValue);
     else
         lockState(xValue, yValue);
-
-    // displaySegment(index, segments[index - 4]);
-
-    attachInterrupt(digitalPinToInterrupt(joySWPin), joySWPressed, FALLING);
 }
 
 void setSegments(int pin, bool state)
@@ -228,27 +227,40 @@ void canvasMovement(int xValue, int yValue)
 
 void joySWPressed()
 {
-    Serial.println("SW Pressed");
-    if (millis() - lastJoySWReading > joyShortDebounce)
-    {
+    joySWState = digitalRead(joySWPin);
 
-        lastJoySWReading = millis();
-        if (millis() - lastJoySWReading > joyLongDebounce)
+    if (lastJoySWState == HIGH && joySWState == LOW)
+    {
+        pressedJoySWTime = millis();
+    }
+    else if (lastJoySWState == LOW && joySWState == HIGH)
+    {
+        releasedJoySWTime = millis();
+
+        long pressDuration = releasedJoySWTime - pressedJoySWTime;
+
+        if (pressDuration > joyShortDebounce)
         {
-            Serial.println("Long Press");
-            for (int i = 0; i < segSize; i++)
+
+            if (pressDuration > joyLongDebounce)
             {
-                setSegments(i, LOW);
+                Serial.println("Long Press");
+                for (int i = 4; i < segSize + 4; i++)
+                {
+                    setSegments(i, LOW);
+                }
+                programState = 1;
+                currentPin = 7;
+                currentDirection = 0;
+                index = 11;
             }
-            programState = 1;
-            currentPin = 7;
-            currentDirection = 0;
-            index = 11;
-        }
-        else
-        {
-            Serial.println("Short Press");
-            programState == 1 ? programState = 2 : programState = 1;
+            else
+            {
+                Serial.println("Short Press");
+                programState == 1 ? programState = 2 : programState = 1;
+            }
         }
     }
+
+    lastJoySWState = joySWState;
 }
