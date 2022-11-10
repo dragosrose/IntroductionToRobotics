@@ -21,7 +21,9 @@ const int joyDownThreshold = 300;
 const int joyShortDebounce = 100;
 const int joyLongDebounce = 500;
 
-int lastJoySWReading = 0;
+unsigned long lastJoySWReading = 0;
+int lastJoySWState = LOW;
+int joySWState;
 
 const int segSize = 8;
 
@@ -50,6 +52,8 @@ int currentPin = 7;
 int currentDirection = 0;
 int index = 11;
 
+int programState = 1;
+
 byte segments[segSize] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 void setup()
@@ -69,16 +73,63 @@ void setup()
 
 void loop()
 {
-
+    displaySegments();
     // Read joystick axis xValue
     int yValue = analogRead(joyYPin);
     int xValue = analogRead(joyXPin);
 
-    // Write a program that moves through each segment of the display by joystick yValue and lights it for 0.5 seconds and then turns it off for 0.5 seconds
+    if (programState == 1)
+        canvasMovement(xValue, yValue);
+    else
+        lockState(xValue, yValue);
+
+    // displaySegment(index, segments[index - 4]);
+
+    attachInterrupt(digitalPinToInterrupt(joySWPin), joySWPressed, FALLING);
+}
+
+void setSegments(int pin, bool state)
+{
+    segments[pin - 4] = state;
+}
+
+void displaySegments()
+{
+    for (int i = 0; i < segSize; i++)
+    {
+        digitalWrite(segmentPins[i], segments[i] ^ commonAnode);
+    }
+}
+
+void displaySegment(byte segment, bool state)
+{
+    digitalWrite(segmentPins[segment - 4], state ^ commonAnode);
+}
+
+void lockState(int xValue, int yValue)
+{
+    if (yValue < joyLeftThreshold && joyIsNeutral)
+    {
+        setSegments(index, LOW);
+        joyIsNeutral = false;
+    }
+    else if (yValue > joyRightThreshold && joyIsNeutral)
+    {
+        setSegments(index, HIGH);
+        joyIsNeutral = false;
+    }
+    else if (yValue > joyLeftThreshold && yValue < joyRightThreshold)
+    {
+        displaySegment(index, segments[index - 4]);
+        joyIsNeutral = true;
+    }
+}
+
+void canvasMovement(int xValue, int yValue)
+{
     if (yValue < joyLeftThreshold && joyIsNeutral)
     {
         // LEFT
-        setSegment(index, LOW);
         currentDirection = 2;
         index = segmentPath[currentPin][currentDirection];
         Serial.print("LEFT: ");
@@ -99,7 +150,6 @@ void loop()
     }
     else if (yValue > joyRightThreshold && joyIsNeutral)
     {
-        setSegment(index, LOW);
         currentDirection = 3;
         Serial.print("RIGHT: ");
         Serial.print(currentPin + 4);
@@ -122,7 +172,6 @@ void loop()
 
     else if (xValue > joyUpThreshold && joyIsNeutral)
     {
-        setSegment(index, LOW);
         currentDirection = 0;
         Serial.print("UP: ");
         Serial.print(currentPin + 4);
@@ -144,7 +193,6 @@ void loop()
     }
     else if (xValue < joyDownThreshold && joyIsNeutral)
     {
-        setSegment(index, LOW);
         currentDirection = 1;
         Serial.print("DOWN: ");
         Serial.print(currentPin + 4);
@@ -168,26 +216,14 @@ void loop()
     {
         if (millis() % 1000 < 500)
         {
-            segments[index - 4] = segmentOn;
+            displaySegment(index, HIGH);
         }
         else
         {
-            segments[index - 4] = !segmentOn;
+            displaySegment(index, LOW);
         }
         joyIsNeutral = true;
     }
-
-    // Serial.println(xValue);
-
-    // Serial.println(index);
-    setSegment(index, segments[index - 4]);
-
-    // attachInterrupt(digitalPinToInterrupt(joySWPin), joySWPressed, FALLING);
-}
-
-void setSegment(byte segment, bool state)
-{
-    digitalWrite(segmentPins[segment - 4], state ^ commonAnode);
 }
 
 void joySWPressed()
@@ -195,18 +231,24 @@ void joySWPressed()
     Serial.println("SW Pressed");
     if (millis() - lastJoySWReading > joyShortDebounce)
     {
+
         lastJoySWReading = millis();
         if (millis() - lastJoySWReading > joyLongDebounce)
         {
+            Serial.println("Long Press");
             for (int i = 0; i < segSize; i++)
             {
-                setSegment(i, LOW);
+                setSegments(i, LOW);
             }
+            programState = 1;
+            currentPin = 7;
+            currentDirection = 0;
+            index = 11;
         }
         else
         {
-            segments[index - 4] = !segments[index - 4];
-            setSegment(index, segments[index - 4]);
+            Serial.println("Short Press");
+            programState == 1 ? programState = 2 : programState = 1;
         }
     }
 }
