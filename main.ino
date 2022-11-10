@@ -50,10 +50,15 @@ const int segmentPath[segSize][numOfDirections] = {
 
 };
 
+const int pinOffset = 4;
+// So I can use both the index in the segmentPins array and the index in the segmentPath array
+
 int currentPin = 7;
+// DP in the segmentPath array
+
 int currentDirection = 0;
 int index = 11;
-
+// DP in the segmentPins array
 int programState = 1;
 
 byte segments[segSize] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -89,7 +94,7 @@ void loop()
 
 void setSegments(int pin, bool state)
 {
-    segments[pin - 4] = state;
+    segments[pin - pinOffset] = state;
 }
 
 void displaySegments()
@@ -100,9 +105,9 @@ void displaySegments()
     }
 }
 
-void displaySegment(byte segment, bool state)
+void displaySegmentByIndex(byte segment, bool state)
 {
-    digitalWrite(segmentPins[segment - 4], state ^ commonAnode);
+    digitalWrite(segmentPins[segment - pinOffset], state ^ commonAnode);
 }
 
 void lockState(int xValue, int yValue)
@@ -119,7 +124,7 @@ void lockState(int xValue, int yValue)
     }
     else if (yValue > joyLeftThreshold && yValue < joyRightThreshold)
     {
-        displaySegment(index, segments[index - 4]);
+        displaySegmentByIndex(index, segments[index - pinOffset]);
         joyIsNeutral = true;
     }
 }
@@ -132,15 +137,15 @@ void canvasMovement(int xValue, int yValue)
         currentDirection = 2;
         index = segmentPath[currentPin][currentDirection];
         Serial.print("LEFT: ");
-        Serial.print(currentPin + 4);
+        Serial.print(currentPin + pinOffset);
 
         if (index == -1)
         {
-            index = currentPin + 4;
+            index = currentPin + pinOffset;
         }
         else
         {
-            currentPin = index - 4;
+            currentPin = index - pinOffset;
         }
 
         Serial.print(" -> ");
@@ -151,16 +156,16 @@ void canvasMovement(int xValue, int yValue)
     {
         currentDirection = 3;
         Serial.print("RIGHT: ");
-        Serial.print(currentPin + 4);
+        Serial.print(currentPin + pinOffset);
 
         index = segmentPath[currentPin][currentDirection];
         if (index == -1)
         {
-            index = currentPin + 4;
+            index = currentPin + pinOffset;
         }
         else
         {
-            currentPin = index - 4;
+            currentPin = index - pinOffset;
         }
 
         Serial.print(" -> ");
@@ -173,16 +178,16 @@ void canvasMovement(int xValue, int yValue)
     {
         currentDirection = 0;
         Serial.print("UP: ");
-        Serial.print(currentPin + 4);
+        Serial.print(currentPin + pinOffset);
 
         index = segmentPath[currentPin][currentDirection];
         if (index == -1)
         {
-            index = currentPin + 4;
+            index = currentPin + pinOffset;
         }
         else
         {
-            currentPin = index - 4;
+            currentPin = index - pinOffset;
         }
 
         Serial.print(" -> ");
@@ -194,16 +199,16 @@ void canvasMovement(int xValue, int yValue)
     {
         currentDirection = 1;
         Serial.print("DOWN: ");
-        Serial.print(currentPin + 4);
+        Serial.print(currentPin + pinOffset);
 
         index = segmentPath[currentPin][currentDirection];
         if (index == -1)
         {
-            index = currentPin + 4;
+            index = currentPin + pinOffset;
         }
         else
         {
-            currentPin = index - 4;
+            currentPin = index - pinOffset;
         }
 
         Serial.print(" -> ");
@@ -215,11 +220,11 @@ void canvasMovement(int xValue, int yValue)
     {
         if (millis() % 1000 < 500)
         {
-            displaySegment(index, HIGH);
+            displaySegmentByIndex(index, HIGH);
         }
         else
         {
-            displaySegment(index, LOW);
+            displaySegmentByIndex(index, LOW);
         }
         joyIsNeutral = true;
     }
@@ -245,7 +250,7 @@ void joySWPressed()
             if (pressDuration > joyLongDebounce)
             {
                 Serial.println("Long Press");
-                for (int i = 4; i < segSize + 4; i++)
+                for (int i = pinOffset; i < segSize + pinOffset; i++)
                 {
                     setSegments(i, LOW);
                 }

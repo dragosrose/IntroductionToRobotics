@@ -10,6 +10,7 @@ Introduction to Robotics laboratory homeworks, taken in the 3rd year at the Facu
     <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#homework-1">Homework 1</a></li>
     <li><a href="#homework-2">Homework 2</a></li>
+    <li><a href="#homework-3">Homework 3</a></li>
   </ol>
 </details></h3>
 
@@ -64,3 +65,17 @@ resistors and wires
 
 <h3> Short video showcasing the setup: </h3>
 <a href="https://drive.google.com/file/d/1prVPlxDzc1HlFhmHoC4C1chddjBHiGcd/view?usp=sharing">Video</a>
+
+<br>
+
+## Homework 3
+
+<b>Technical task: </b> "Drawing" on a 7-digit LED display using a joystick. The joystick is used to move the cursor on the display, and the push button is used to draw. The cursor is represented by a blinking segment and upon selecting said segment it can be turnt on or off by joystick movement. The whole display is cleared by pressing the push button for more than 0.5 seconds.
+
+<h3>Picture of the setup: </h3>
+<img src="https://drive.google.com/uc?export=view&id=1vpdlEugEEhexd5KGP4MRiqesWY2ZpBPp" alt="setup picture" />
+<br>
+
+<h3>Short video showcasing the setup: </h3>
+<a href= "https://drive.google.com/file/d/1vnB6PrdBQqzXwLHaoxE45b_ltmIOdHG1/view?usp=share_link">Video</a>
+<br>
