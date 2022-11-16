@@ -1,13 +1,15 @@
-const int pinA = 4;
-const int pinB = 5;
-const int pinC = 6;
-const int pinD = 7;
-const int pinE = 8;
-const int pinF = 9;
-const int pinG = 10;
-const int pinDP = 11;
+// DS= [D]ata [S]torage - data
+// STCP= [ST]orage [C]lock [P]in latch
+// SHCP= [SH]ift register [C]lock [P]in clock
 
-int state = 1;
+const int latchPin = 11; // STCP to 12 on Shift Register
+const int clockPin = 10; // SHCP to 11 on Shift Register
+const int dataPin = 12;  // DS to 14 on Shift Register
+
+const int segD1 = 7;
+const int segD2 = 6;
+const int segD3 = 5;
+const int segD4 = 4;
 
 const int joyXPin = A0;
 const int joyYPin = A1;
@@ -18,254 +20,200 @@ const int joyRightThreshold = 600;
 const int joyUpThreshold = 900;
 const int joyDownThreshold = 300;
 
+unsigned long pressedJoySWTime = 0;
+unsigned long releasedJoySWTime = 0;
+
 const int joyShortDebounce = 100;
 const int joyLongDebounce = 500;
 
-unsigned long pressedJoySWTime = 0;
-unsigned long releasedJoySWTime = 0;
+bool joyIsNeutral = false;
 
 int lastJoySWState = LOW;
 int joySWState;
 
-const int segSize = 8;
+bool selected = false;
 
-bool commonAnode = false;
+const byte regSize = 8; // 1 byte aka 8 bits
 
-bool joyIsNeutral = false;
+int displayDigits[] = {
+    segD1, segD2, segD3, segD4};
 
-byte segmentOn = HIGH;
+const int displayCount = 4;
+const int encodingsNumber = 16;
 
-const int numOfDirections = 4;
-const int segmentPins[segSize] = {pinA, pinB, pinC, pinD, pinE, pinF, pinG, pinDP};
-const int segmentPath[segSize][numOfDirections] = {
-    // UP, DOWN, LEFT, RIGHT
-    {-1, pinG, pinF, pinB},
-    {pinA, pinG, pinF, -1},
-    {pinG, pinD, pinE, pinDP},
-    {pinG, -1, pinE, pinC},
-    {pinG, pinD, -1, pinC},
-    {pinA, pinG, -1, pinB},
-    {pinA, pinD, -1, -1},
-    {-1, -1, pinC, -1},
+const int blinkDelay = 250;
 
+int number;
+const int dpByteEncoding = 0b00000001;
+
+int byteEncodings[encodingsNumber] = {
+    // A B C D E F G DP
+    B11111100, // 0
+    B01100000, // 1
+    B11011010, // 2
+    B11110010, // 3
+    B01100110, // 4
+    B10110110, // 5
+    B10111110, // 6
+    B11100000, // 7
+    B11111110, // 8
+    B11110110, // 9
+    B11101110, // A
+    B00111110, // b
+    B10011100, // C
+    B01111010, // d
+    B10011110, // E
+    B10001110  // F
 };
 
-const int pinOffset = 4;
-// So I can use both the index in the segmentPins array and the index in the segmentPath array
-
-int currentPin = 7;
-// DP in the segmentPath array
-
-int currentDirection = 0;
-int index = 11;
-// DP in the segmentPins array
-int programState = 1;
-
-byte segments[segSize] = {0, 0, 0, 0, 0, 0, 0, 0};
+int digits[displayCount] = {0, 0, 0, 0};
+int currentDisplay = 0;
 
 void setup()
 {
-    for (int i = 0; i < segSize; i++)
+    // put your setup code here, to run once:
+    pinMode(latchPin, OUTPUT);
+    pinMode(clockPin, OUTPUT);
+    pinMode(dataPin, OUTPUT);
+
+    for (int i = 0; i < displayCount; i++)
     {
-        pinMode(segmentPins[i], OUTPUT);
+        pinMode(displayDigits[i], OUTPUT);
+        digitalWrite(displayDigits[i], LOW);
     }
     pinMode(joySWPin, INPUT_PULLUP);
-    if (commonAnode)
-    {
-        segmentOn = !segmentOn;
-    }
-
     Serial.begin(9600);
 }
 
 void loop()
 {
-    displaySegments();
+    ReadFromJoyStick();
+    writeNumber(currentDisplay);
+}
+
+void ReadFromJoyStick()
+{
     joySWPressed();
-    // Read joystick axis xValue
-    int yValue = analogRead(joyYPin);
-    int xValue = analogRead(joyXPin);
 
-    if (programState == 1)
-        canvasMovement(xValue, yValue);
-    else
-        lockState(xValue, yValue);
-}
+    int joyX = analogRead(joyXPin);
+    int joyY = analogRead(joyYPin);
 
-void setSegments(int pin, bool state)
-{
-    segments[pin - pinOffset] = state;
-}
-
-void displaySegments()
-{
-    for (int i = 0; i < segSize; i++)
+    if (joyY < joyLeftThreshold && joyIsNeutral && selected == false)
     {
-        digitalWrite(segmentPins[i], segments[i] ^ commonAnode);
-    }
-}
-
-void displaySegmentByIndex(byte segment, bool state)
-{
-    digitalWrite(segmentPins[segment - pinOffset], state ^ commonAnode);
-}
-
-void lockState(int xValue, int yValue)
-{
-    if (yValue < joyLeftThreshold && joyIsNeutral)
-    {
-        setSegments(index, LOW);
+        currentDisplay++;
+        currentDisplay %= displayCount;
         joyIsNeutral = false;
+        Serial.println("Left");
     }
-    else if (yValue > joyRightThreshold && joyIsNeutral)
+    else if (joyY > joyRightThreshold && joyIsNeutral && selected == false)
     {
-        setSegments(index, HIGH);
+        currentDisplay--;
+        currentDisplay = (displayCount + (currentDisplay % displayCount)) % displayCount;
         joyIsNeutral = false;
+        Serial.println("Right");
     }
-    else if (yValue > joyLeftThreshold && yValue < joyRightThreshold)
+    else if (joyX > joyUpThreshold && joyIsNeutral && selected == true)
     {
-        displaySegmentByIndex(index, segments[index - pinOffset]);
+        digits[currentDisplay]++;
+        digits[currentDisplay] %= encodingsNumber;
+        joyIsNeutral = false;
+        Serial.println("Up");
+    }
+    else if (joyX < joyDownThreshold && joyIsNeutral && selected == true)
+    {
+        digits[currentDisplay]--;
+        digits[currentDisplay] = (encodingsNumber + (digits[currentDisplay] % encodingsNumber)) % encodingsNumber;
+        joyIsNeutral = false;
+        Serial.println("Down");
+    }
+    else if (joyX >= joyDownThreshold && joyX < joyUpThreshold && joyY >= joyLeftThreshold && joyY < joyRightThreshold)
+    {
         joyIsNeutral = true;
     }
 }
 
-void canvasMovement(int xValue, int yValue)
+void writeNumber(int currentDisplay)
 {
-    if (yValue < joyLeftThreshold && joyIsNeutral)
+    for (int i = 0; i < displayCount; i++)
     {
-        // LEFT
-        currentDirection = 2;
-        index = segmentPath[currentPin][currentDirection];
-        Serial.print("LEFT: ");
-        Serial.print(currentPin + pinOffset);
-
-        if (index == -1)
+        if (i == currentDisplay)
         {
-            index = currentPin + pinOffset;
+            if (selected == true)
+                number = byteEncodings[digits[i]] + dpByteEncoding;
+            else
+            {
+                if (millis() % blinkDelay < blinkDelay / 2)
+                    number = byteEncodings[digits[i]] + dpByteEncoding;
+                else
+                    number = byteEncodings[digits[i]];
+            }
         }
         else
         {
-            currentPin = index - pinOffset;
+            number = byteEncodings[digits[i]];
         }
 
-        Serial.print(" -> ");
-        Serial.println(index);
-        joyIsNeutral = false;
-    }
-    else if (yValue > joyRightThreshold && joyIsNeutral)
-    {
-        currentDirection = 3;
-        Serial.print("RIGHT: ");
-        Serial.print(currentPin + pinOffset);
-
-        index = segmentPath[currentPin][currentDirection];
-        if (index == -1)
-        {
-            index = currentPin + pinOffset;
-        }
-        else
-        {
-            currentPin = index - pinOffset;
-        }
-
-        Serial.print(" -> ");
-        Serial.println(index);
-
-        joyIsNeutral = false;
-    }
-
-    else if (xValue > joyUpThreshold && joyIsNeutral)
-    {
-        currentDirection = 0;
-        Serial.print("UP: ");
-        Serial.print(currentPin + pinOffset);
-
-        index = segmentPath[currentPin][currentDirection];
-        if (index == -1)
-        {
-            index = currentPin + pinOffset;
-        }
-        else
-        {
-            currentPin = index - pinOffset;
-        }
-
-        Serial.print(" -> ");
-        Serial.println(index);
-
-        joyIsNeutral = false;
-    }
-    else if (xValue < joyDownThreshold && joyIsNeutral)
-    {
-        currentDirection = 1;
-        Serial.print("DOWN: ");
-        Serial.print(currentPin + pinOffset);
-
-        index = segmentPath[currentPin][currentDirection];
-        if (index == -1)
-        {
-            index = currentPin + pinOffset;
-        }
-        else
-        {
-            currentPin = index - pinOffset;
-        }
-
-        Serial.print(" -> ");
-        Serial.println(index);
-
-        joyIsNeutral = false;
-    }
-    else if (yValue > joyLeftThreshold && yValue < joyRightThreshold && xValue < joyUpThreshold && xValue > joyDownThreshold)
-    {
-        if (millis() % 1000 < 500)
-        {
-            displaySegmentByIndex(index, HIGH);
-        }
-        else
-        {
-            displaySegmentByIndex(index, LOW);
-        }
-        joyIsNeutral = true;
+        writeReg(number);
+        activateDisplay(i);
+        delay(5);
     }
 }
 
 void joySWPressed()
 {
-    joySWState = digitalRead(joySWPin);
-
-    if (lastJoySWState == HIGH && joySWState == LOW)
+    int joySWState = digitalRead(joySWPin);
+    // Change "selected" state when joySW is pressed and released and when the button is long pressed (500ms) then reset the display
+    if (joySWState == LOW && lastJoySWState == HIGH)
     {
         pressedJoySWTime = millis();
+        Serial.println("Pressed");
     }
-    else if (lastJoySWState == LOW && joySWState == HIGH)
+    else if (joySWState == HIGH && lastJoySWState == LOW)
     {
         releasedJoySWTime = millis();
-
-        long pressDuration = releasedJoySWTime - pressedJoySWTime;
-
-        if (pressDuration > joyShortDebounce)
+        if (releasedJoySWTime - pressedJoySWTime > joyLongDebounce)
         {
-
-            if (pressDuration > joyLongDebounce)
-            {
-                Serial.println("Long Press");
-                for (int i = pinOffset; i < segSize + pinOffset; i++)
-                {
-                    setSegments(i, LOW);
-                }
-                programState = 1;
-                currentPin = 7;
-                currentDirection = 0;
-                index = 11;
-            }
-            else
-            {
-                Serial.println("Short Press");
-                programState == 1 ? programState = 2 : programState = 1;
-            }
+            initialDisplayConfiguration();
+        }
+        else if (releasedJoySWTime - pressedJoySWTime > joyShortDebounce)
+        {
+            Serial.println("Released");
+            selected = !selected;
         }
     }
 
     lastJoySWState = joySWState;
+}
+
+void initialDisplayConfiguration()
+{
+    currentDisplay = 0;
+    selected = false;
+    for (int i = 0; i < displayCount; i++)
+    {
+        digits[i] = 0;
+    }
+}
+
+void writeReg(int digit)
+{
+    // ST_CP LOW to keep LEDs from changing while reading serial data
+    digitalWrite(latchPin, LOW);
+    // Shift out the bits
+    shiftOut(dataPin, clockPin, MSBFIRST, digit);
+    /* ST_CP on Rising to move the data from shift register
+     * to storage register, making the bits available for output.
+     */
+    digitalWrite(latchPin, HIGH);
+}
+
+void activateDisplay(int displayNumber)
+{
+    // first, disable all the display digits
+    for (int i = 0; i < displayCount; i++)
+    {
+        digitalWrite(displayDigits[i], HIGH);
+    }
+    // then enable only the digit you want to use now
+    digitalWrite(displayDigits[displayNumber], LOW);
 }

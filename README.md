@@ -11,6 +11,7 @@ Introduction to Robotics laboratory homeworks, taken in the 3rd year at the Facu
     <li><a href="#homework-1">Homework 1</a></li>
     <li><a href="#homework-2">Homework 2</a></li>
     <li><a href="#homework-3">Homework 3</a></li>
+    <li><a href="#homework-4">Homework 4</a></li>
   </ol>
 </details></h3>
 
@@ -79,3 +80,18 @@ resistors and wires
 <h3>Short video showcasing the setup: </h3>
 <a href= "https://drive.google.com/file/d/1vnB6PrdBQqzXwLHaoxE45b_ltmIOdHG1/view?usp=share_link">Video</a>
 <br>
+
+## Homework 4
+
+<b>Technical task: </b> Using the joystick to move through the 4 digit 7 segment display, and using the push button to select a digit. The selected digit is then incremented or decremented by the joystick movement. The whole display is cleared by pressing the push button for more than 0.5 seconds.
+
+<b>Components:</b> a 4 digit 7-segment displays, 1 joystick, 1 74hc595 shift register, wires
+
+<h3>Picture of the setup: </h3>
+<img src="./homework/homework4/picture.jpeg" alt="setup picture" />
+<br>
+
+<h3>Short video showcasing the setup: </h3>
+<video width="320" height="240" controls>
+  <source src="./homework/homework4/video.mp4" type="video/mp4">
+</video>
