@@ -92,6 +92,7 @@ resistors and wires
 <br>
 
 <h3>Short video showcasing the setup: </h3>
-<video width="320" height="240" autoplay muted loop>
-  <source src="https://github.com/nomoney34/IntroductionToRobotics/raw/main/homework/homework4/video.mp4" type="video/mp4">
-</video>
+
+https://user-images.githubusercontent.com/79592589/203647423-68d1bf6f-cae9-4e29-a928-178dc054c4f5.mp4
+
+
