@@ -71,8 +71,6 @@ const byte SUBMENU_SETTINGS_LED_BRIGHTNESS = 2;
 const byte SUBMENU_SETTINGS_MATRIX_BRIGHTNESS = 3;
 const byte SUBMENU_SETTINGS_BACK = 4;
 
-String playerName = "AAA";
-
 // About options
 const byte SUBMENU_ABOUT_CREDITS = 0;
 const byte SUBMENU_ABOUT_BACK = 1;
