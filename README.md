@@ -11,9 +11,9 @@ Introduction to Robotics laboratory homeworks, taken in the 3rd year at the Facu
     <li><a href="#homework-2">Homework 2</a></li>
     <li><a href="#homework-3">Homework 3</a></li>
     <li><a href="#homework-4">Homework 4</a></li>
+    <li><a href="#homework-5">Homework 5</a></li>
   </ol>
 </details>
-
 
 ## Getting Started
 
@@ -86,11 +86,15 @@ resistors and wires
 <b>Components:</b> a 4 digit 7-segment displays, 1 joystick, 1 74hc595 shift register, wires
 
 <h3>Picture of the setup: </h3>
-<img src="./homework/homework4/picture.jpeg" alt="setup picture" />
-<br>
 
 <h3>Short video showcasing the setup: </h3>
 
 https://user-images.githubusercontent.com/79592589/203647423-68d1bf6f-cae9-4e29-a928-178dc054c4f5.mp4
 
+## Homework 5
 
+<b>Technical task: </b> Menu for the game, where the user can scroll on the LCD and select options using the joystick.
+
+<h3>Picture of the setup: </h3>
+
+<h3>Short video showcasing the setup: </h3>
