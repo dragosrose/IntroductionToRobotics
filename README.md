@@ -86,6 +86,7 @@ resistors and wires
 <b>Components:</b> a 4 digit 7-segment displays, 1 joystick, 1 74hc595 shift register, wires
 
 <h3>Picture of the setup: </h3>
+
 ![picture](https://user-images.githubusercontent.com/79592589/206430545-1c84c926-fc49-4722-ac1a-faff66aabfc2.png)
 
 <h3>Short video showcasing the setup: </h3>
@@ -97,6 +98,7 @@ https://user-images.githubusercontent.com/79592589/203647423-68d1bf6f-cae9-4e29-
 <b>Technical task: </b> Menu for the game, where the user can scroll on the LCD and select options using the joystick.
 
 <h3>Picture of the setup: </h3>
+
 ![index](https://user-images.githubusercontent.com/79592589/206432332-89f18c5c-a2ad-48da-8521-8b56950dd8df.jpeg)
 
 
